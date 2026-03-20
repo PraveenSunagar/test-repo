@@ -1,0 +1,249 @@
+1️⃣ First understand the concept
+What is a Topic?
+
+A topic is like a data channel where nodes send and receive messages.
+
+Think of it like radio broadcasting:
+
+Publisher Node  ----->  Topic  ----->  Subscriber Node
+
+Example in turtlesim:
+
+/teleop_turtle  ---->  /turtle1/cmd_vel  ---->  /turtlesim
+
+/teleop_turtle publishes keyboard commands
+
+/turtlesim subscribes to them to move the turtle
+
+Topics are the main way data moves between nodes in a ROS system.
+
+2️⃣ Step 1 — Setup turtlesim
+
+Open terminal 1:
+
+ros2 run turtlesim turtlesim_node
+
+Open terminal 2:
+
+ros2 run turtlesim turtle_teleop_key
+
+Now:
+
+turtle simulator opens
+
+you can control turtle using arrow keys.
+
+Nodes running:
+
+/turtlesim
+/teleop_turtle
+3️⃣ Step 2 — Visualize with rqt_graph
+
+Run:
+
+rqt_graph
+
+You will see something like:
+
+/teleop_turtle ---> /turtle1/cmd_vel ---> /turtlesim
+
+Meaning:
+
+Node	Role
+teleop_turtle	publisher
+turtlesim	subscriber
+/turtle1/cmd_vel	topic
+
+This graph helps debug large ROS systems.
+
+4️⃣ Step 3 — List all topics
+
+Run:
+
+ros2 topic list
+
+Example output:
+
+/parameter_events
+/rosout
+/turtle1/cmd_vel
+/turtle1/color_sensor
+/turtle1/pose
+
+Meaning:
+
+Topic	Purpose
+/cmd_vel	velocity command
+/pose	turtle position
+/color_sensor	color under turtle
+
+You can also see topic type:
+
+ros2 topic list -t
+
+Example:
+
+/turtle1/cmd_vel [geometry_msgs/msg/Twist]
+
+The message type tells ROS what data format is used.
+
+5️⃣ Step 4 — View topic data
+
+Run:
+
+ros2 topic echo /turtle1/cmd_vel
+
+Now press arrow keys in teleop window.
+
+You will see messages like:
+
+linear:
+  x: 2.0
+  y: 0.0
+  z: 0.0
+angular:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+
+Meaning:
+
+Field	Meaning
+linear	forward velocity
+angular	rotation
+
+So now you are watching the messages sent to move the turtle.
+
+6️⃣ Step 5 — Inspect a topic
+
+Run:
+
+ros2 topic info /turtle1/cmd_vel
+
+Output:
+
+Type: geometry_msgs/msg/Twist
+Publisher count: 1
+Subscription count: 1
+
+Meaning:
+
+Field	Meaning
+Type	message type
+Publisher	who sends data
+Subscriber	who receives
+
+Topics can be:
+
+1 publisher → many subscribers
+many publishers → many subscribers
+7️⃣ Step 6 — See message structure
+
+Run:
+
+ros2 interface show geometry_msgs/msg/Twist
+
+Output:
+
+Vector3 linear
+Vector3 angular
+
+Meaning:
+
+Twist
+ ├── linear
+ │    ├── x
+ │    ├── y
+ │    └── z
+ └── angular
+      ├── x
+      ├── y
+      └── z
+
+This tells you exactly what data format must be used.
+
+8️⃣ Step 7 — Publish to a topic manually
+
+You can control the turtle without teleop.
+
+Run:
+
+ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist \
+"{linear: {x: 2.0}, angular: {z: 1.8}}"
+
+The turtle will move.
+
+Explanation:
+
+ros2 topic pub
+<topic_name>
+<message_type>
+<data>
+
+ROS expects the data in YAML format.
+
+9️⃣ Continuous publishing
+
+To move continuously:
+
+ros2 topic pub --rate 1 /turtle1/cmd_vel geometry_msgs/msg/Twist \
+"{linear: {x: 2.0}, angular: {z: 1.8}}"
+
+Meaning:
+
+publish 1 message per second
+🔟 Check publishing rate
+
+Run:
+
+ros2 topic hz /turtle1/pose
+
+Example output:
+
+average rate: 59.3 Hz
+
+Meaning:
+
+The turtle position is published about 60 times per second.
+
+🧠 What you learned (Important)
+
+Main ROS2 topic commands:
+
+Command	Purpose
+ros2 topic list	show topics
+ros2 topic echo	see topic messages
+ros2 topic info	inspect topic
+ros2 topic pub	publish message
+ros2 topic hz	check frequency
+ros2 interface show	message structure
+🧠 Real robotics example
+
+In a real robot:
+
+Camera Node  ----> /camera/image
+Lidar Node   ----> /scan
+IMU Node     ----> /imu
+Teleop Node  ----> /cmd_vel
+
+Navigation node subscribes to all of them.
+
+⭐ The full ROS communication chain
+
+You now know:
+
+Nodes → Topics → Messages
+
+Example:
+
+Node: teleop_keyboard
+Topic: /cmd_vel
+Message: geometry_msgs/Twist
+
+✅ Next tutorial in ROS docs
+
+You should learn next:
+
+1️⃣ Services (request/response communication)
+2️⃣ Parameters
+3️⃣ Writing your first ROS2 nodegit
